@@ -5,8 +5,10 @@ from nltk.stem.porter import PorterStemmer
 import joblib
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 import pandas as pd
-
+from flask import Flask, request, jsonify
 import numpy as np
+
+app = Flask(__name__)
 
 class Node:
   def __init__(self, feature = None, threshold = None, left = None, right = None, value = None):
@@ -160,10 +162,27 @@ def demoDecisionTree(model, inp):
     demo_y = model.predict([demo_x[length_df]])
     return demo_y
 
-if __name__ == "__main__":
+@app.route('/predict', methods=['POST'])
+def predict():
     loaded_model = joblib.load('decision_tree_model.pkl')
-    while(True):
-        print("Nhap tin nhan: ")
-        inp = input()
-        print(demoDecisionTree(loaded_model, inp))
+    if request.method == 'POST':
+        data = request.get_json()
+        message = data['message']
+        result = demoDecisionTree(loaded_model, message)
+        return jsonify({'prediction': result.tolist(), 'message': message})
+
+if __name__ == "__main__":
+    # loaded_model = joblib.load('decision_tree_model.pkl')
+    app.run(debug=True, host='localhost', port=3434)
+    # while(True):
+    #     print("Nhap tin nhan: ")
+    #     inp = input()
+    #     print(demoDecisionTree(loaded_model, inp))
         
+        
+# if __name__ == "__main__":
+#     loaded_model = joblib.load('decision_tree_model.pkl')
+#     while(True):
+#         print("Nhap tin nhan: ")
+#         inp = input()
+#         print(demoDecisionTree(loaded_model, inp))
